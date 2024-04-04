@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,8 +41,10 @@ public class Bot : IBot
 
 		client.Ready += ClientReadyAsync;
 
-		await client.ConnectAsync();
+		var slash = client.UseSlashCommands();
+		slash.RegisterCommands<SlashCommands>(serverID);
 
+		await client.ConnectAsync();
 		await Task.Delay(-1);
 	}
 
