@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -8,26 +9,27 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using DSharpPlus.SlashCommands.EventArgs;
+using Serilog;
 
 namespace dotNetDiscordBot;
 
 public class Bot : IBot
 {
-	ServiceProvider services;
-	IConfiguration configuration;
+	private readonly ILogger<Bot> _log;
+	private readonly IConfiguration _config;
 
 	string key;
-	string serverID_asString;
 	ulong serverID;
 
-    public Bot(ServiceProvider _services)
+    public Bot(ILogger<Bot> log, IConfiguration config)
     {
-		services = _services;
-		configuration = services.GetRequiredService<IConfiguration>();
+		_config = config;
+		_log = log;
 
-		key = configuration["DiscordBotKey"] ?? throw new Exception("--> DiscordBotKey <-- is missing in appsettings.json");
-		serverID_asString = configuration["serverID"] ?? throw new Exception("--> ServerID <-- is missing in appsettings.json");
-		serverID = Convert.ToUInt64(serverID_asString);
+		key = _config.GetValue<string>("DiscordBotKey") ?? throw new Exception("--> DiscordBotKey <-- is missing in appsettings.json");
+		serverID = _config.GetValue<ulong>("ServerID");
 	}
 
     public async Task StartAsync()
@@ -43,13 +45,20 @@ public class Bot : IBot
 
 		var slash = client.UseSlashCommands();
 		slash.RegisterCommands<SlashCommands>(serverID);
+		slash.SlashCommandExecuted += SlashCommandExecutedAsync;
 
 		await client.ConnectAsync();
 		await Task.Delay(-1);
 	}
 
+	private async Task SlashCommandExecutedAsync(SlashCommandsExtension sender, SlashCommandExecutedEventArgs args)
+	{
+		var ctx = args.Context;
+		_log.LogInformation("{user} used the {command} command, in the channel: {channel}", ctx.Member.DisplayName, ctx.CommandName, ctx.Channel.Name);
+	}
+
 	private async Task ClientReadyAsync(DiscordClient sender, ReadyEventArgs args)
 	{
-		await Console.Out.WriteLineAsync("Bot is now running! Ready to go!");
+		_log.LogInformation("The bot: {botinfo} is now ready --> ping time: {time}", sender.CurrentApplication.Name, sender.Ping);
 	}
 }
