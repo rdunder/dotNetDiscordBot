@@ -3,7 +3,7 @@ This project uses the [DSharp+](https://dsharpplus.github.io/DSharpPlus/) packag
 Slah commands can be added anywhere within the project, be sure the command classes are public, you can find more information about how slash commands work in the documentation for the DSharp+ package.
 
 ## To get started
-You need to add the file appsettings.json in the root folder and add this to it:
+You need to add the file appsettings.json in the root folder and add this to it: <br />
 _where DiscordBotKey is the token from Discord Developer panel and ServerID is the ID of the server where you want to add the bot._
 
     "DiscordBotKey": "",
