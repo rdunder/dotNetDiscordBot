@@ -4,6 +4,7 @@ Slah commands can be added anywhere within the project, be sure the command clas
 
 ## To get started
 You need to add the file appsettings.json in the root folder and add this to it:
+_where DiscordBotKey is the token from Discord Developer panel and ServerID is the ID of the server where you want to add the bot._
 
     "DiscordBotKey": "",
     "ServerID": ,
