@@ -1,17 +1,16 @@
-﻿using System;
-using System.Threading.Tasks;
-using dotNetDiscordBot;
+﻿using dotNetDiscordBot;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
+using System.Reflection;
 
 public class Program
 {
 	static async Task Main(string[] args)
 	{
-
+		//	Set up configuration for Serilog
 		var builder = new ConfigurationBuilder();
 		BuildConfig(builder);
 
@@ -21,16 +20,22 @@ public class Program
 			.WriteTo.Console()
 			.CreateLogger();
 
+		//	Set up the Host and add services
 		var host = Host.CreateDefaultBuilder()
+			.UseConsoleLifetime()
 			.ConfigureServices((context, services) =>
 			{
-				services.AddTransient<IBot, Bot>();
+				services.AddHostedService<BotService>();
 			})
 			.UseSerilog()
 			.Build();
+		
+		await host.RunAsync();
 
-		var bot = ActivatorUtilities.CreateInstance<Bot>(host.Services);
-		await bot.StartAsync();
+		await Log.CloseAndFlushAsync();
+
+		//var bot = ActivatorUtilities.CreateInstance<Bot>(host.Services);
+		//await bot.StartAsync();
 	}
 
 	static void BuildConfig(IConfigurationBuilder builder)
